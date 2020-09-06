@@ -10,7 +10,7 @@ pthread_cond_t *Database_Changed_Signal;
 
 const char* SHARED_MUTEX_NAMETAG = "SHARED_MEMORY_MUTEX_DB";
 const char* SHARED_CONDITION_NAMETAG = "SHARED_MEMORY_CONDITION_DB";
-const char* REMOTE_DATABASE = "/home/Database.db";
+const char* REMOTE_DATABASE = "/tmp/Database.db";
 
 Sync_State Changed_Records_Report;
 
@@ -19,14 +19,14 @@ Sync_State Changed_Records_Report;
 ///////////////////////////////////////////////////////////////////////////////*/
 
 inline int Read_Database_From_File(FILE* Database_FD, Database* local_db){
-    int Operation_State = -1;
+    int Operation_State = ERROR;
 
     pthread_mutex_lock(&Database_Access_Lock);
     Database_FD = fopen(REMOTE_DATABASE,"rb");
     if(Database_FD != NULL){
         fread(local_db, sizeof(Database), 1, Database_FD);
         fclose(Database_FD);
-        Operation_State = 1;
+        Operation_State = SUCCESS;
     }
     pthread_mutex_unlock(&Database_Access_Lock);
 
@@ -34,14 +34,14 @@ inline int Read_Database_From_File(FILE* Database_FD, Database* local_db){
 }
 
 inline int Write_Database_To_File(Database* local_db, FILE* Database_FD){
-    int Operation_State = -1;
+    int Operation_State = ERROR;
 
     pthread_mutex_lock(&Database_Access_Lock);
     Database_FD = fopen(REMOTE_DATABASE,"wb");
     if(Database_FD != NULL){
         fwrite(local_db, sizeof(Database), 1, Database_FD);
         fclose(Database_FD);
-        Operation_State = 1;
+        Operation_State = SUCCESS;
     }
     pthread_mutex_unlock(&Database_Access_Lock);
     pthread_cond_broadcast(Database_Changed_Signal);
@@ -52,10 +52,9 @@ inline int Write_Database_To_File(Database* local_db, FILE* Database_FD){
 int Change_Local_Record(Database* local_db, const __uint8_t recordID, const Record localRecord){
     if (recordID < MAX_RECORDS_COUNT){
         local_db->Records[recordID] = localRecord;
-        return 1;
+        return SUCCESS;
     }
-    perror("Index out of bounds.");
-    return -1;
+    return ERROR;
 }
 
 int Database_INIT(Database* local_db){
@@ -65,10 +64,12 @@ int Database_INIT(Database* local_db){
 
     //Initialize sharem memory fragments to be available for all processes.
     Shared_Mutex_FD = shm_open(SHARED_MUTEX_NAMETAG, O_CREAT|O_RDWR, 0666);
+    if (Shared_Mutex_FD == -1) return ERROR;
     ftruncate(Shared_Mutex_FD,sizeof(pthread_mutex_t));
     Database_Synchronization_Lock = mmap(0, sizeof(pthread_mutex_t), PROT_READ|PROT_WRITE, MAP_SHARED, Shared_Mutex_FD, 0);
 
     Shared_Condition_FD = shm_open(SHARED_CONDITION_NAMETAG, O_CREAT|O_RDWR, 0666);
+    if (Shared_Condition_FD == -1) return ERROR;
     ftruncate(Shared_Condition_FD, sizeof(pthread_cond_t));
     Database_Changed_Signal = mmap(0, sizeof(pthread_cond_t), PROT_READ|PROT_WRITE, MAP_SHARED, Shared_Condition_FD, 0);
 
@@ -91,9 +92,9 @@ int Database_INIT(Database* local_db){
             local_db->Records[i].Data = 0;
         }
         Write_Database_To_File(local_db,Database_FD);
-        return -1;
+        return NEW_DATABASE;
     }
-    return 1;
+    return SUCCESS;
 }
 
 int Database_JOIN(Database* local_db){
@@ -102,13 +103,13 @@ int Database_JOIN(Database* local_db){
     int Shared_Condition_FD;
 
     Shared_Mutex_FD = shm_open(SHARED_MUTEX_NAMETAG, O_RDWR, 0666);
-    if (Shared_Mutex_FD == -1) return -1;
+    if (Shared_Mutex_FD == -1) return ERROR;
     ftruncate(Shared_Mutex_FD,sizeof(pthread_mutex_t));
     Database_Synchronization_Lock = mmap(0, sizeof(pthread_mutex_t), PROT_READ|PROT_WRITE, MAP_SHARED, Shared_Mutex_FD, 0);
 
 
     Shared_Condition_FD = shm_open(SHARED_CONDITION_NAMETAG, O_RDWR, 0666);
-    if (Shared_Condition_FD == -1) return -1;
+    if (Shared_Condition_FD == -1) return ERROR;
     ftruncate(Shared_Condition_FD, sizeof(pthread_cond_t));
     Database_Changed_Signal = mmap(0, sizeof(pthread_cond_t), PROT_READ|PROT_WRITE, MAP_SHARED, Shared_Condition_FD, 0);
 
@@ -118,17 +119,17 @@ int Database_JOIN(Database* local_db){
             local_db->Records[i].Data = 0;
         }
         Write_Database_To_File(local_db,Database_FD);
-        return 0;
+        return NEW_DATABASE;
     }
-    return 1;
+    return SUCCESS;
 }
 
 static int Compare_Records(Database* First, Database* Second){
     for(int i =0; i<MAX_RECORDS_COUNT; ++i){
         if (memcmp((void*)&First->Records[i], (void*)&Second->Records[i],sizeof(Record)) != 0)
-            return 0;
+            return RECORDS_DIFFERENT;
     }
-    return 1;
+    return RECORDS_SAME;
 }
 
 static int Remote_DB_Comparison_Check(Database* Database_input){
@@ -170,9 +171,8 @@ void* Synchronize_With_Remote_Task(void * Database_input){
 }
 
 void* Write_To_Database_With_Notify(void* Database_input){
-    Database temp;
     FILE* Database_FD = NULL;
 
-    Write_Database_To_File(&temp,Database_FD);
+    Write_Database_To_File((Database*)Database_input,Database_FD);
     return NULL;
 }
