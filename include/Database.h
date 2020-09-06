@@ -10,6 +10,12 @@
 #include <fcntl.h>
 
 #define MAX_RECORDS_COUNT 16
+#define SUCCESS 1
+#define ERROR -1
+#define NEW_DATABASE 0
+
+#define RECORDS_DIFFERENT 0
+#define RECORDS_SAME 1
 
 typedef struct {
         int Data;
