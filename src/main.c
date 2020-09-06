@@ -5,10 +5,12 @@ int main(int argc, char* argv[]){
     pthread_t Sync_Thread;
 
     if (Database_JOIN(&local_db) == -1){
-        Database_INIT(&local_db);
+        if (Database_INIT(&local_db) == ERROR){
+            perror("Database initialization failed");
+        }
     }
-
-    pthread_create(&Sync_Thread, NULL, Synchronize_With_Remote_Task, &local_db);
+    if (pthread_create(&Sync_Thread, NULL, Synchronize_With_Remote_Task, &local_db) != 0)
+        perror("Thread creation failed");
 
     for(;;){
         sleep(1);
