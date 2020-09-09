@@ -4,7 +4,13 @@ int main(int argc, char* argv[]){
     Database local_db;
     pthread_t Sync_Thread;
 
-    Database_INIT(&local_db, &Sync_Thread, NULL);
+    setbuf(stdout, NULL);
+
+    Database_INIT(&local_db);
+    if (pthread_create(&Sync_Thread, NULL, Pthread_Synchronize_With_Remote, &local_db) != 0){
+        perror("Thread creation failed");
+        return ERROR;
+    }
 
     while(1){
         sleep(3);
@@ -13,5 +19,6 @@ int main(int argc, char* argv[]){
         }
     }
 
+    pthread_exit(NULL);
     return 0;
 }

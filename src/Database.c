@@ -21,7 +21,6 @@ Sync_State Changed_Records_Report;
 static int Initialize_Shared_Memory();
 static int Initialize_Thread_Synchronization();
 static int Initialize_Remote_Database(Database*);
-static void* Pthread_Synchronize_With_Remote(void *);
 
 static inline int Compare_Records(Database*, Database*);
 static inline int Remote_DB_Comparison_Check(Database*);
@@ -31,26 +30,25 @@ static void Synchronize_Local_DB(FILE*, Database*, Sync_State*);
                             Initialization:
 ///////////////////////////////////////////////////////////////////////////////*/
 
-int Database_INIT(Database* local_db, pthread_t* Synchronization_Thread, pthread_attr_t* Synchronization_Attributes){
-    
-    if (Initialize_Shared_Memory() == ERROR){
-        perror("Shared memory initialization failed");
-        return ERROR;
-    }
-    
-    if (Initialize_Thread_Synchronization() == ERROR){
-        perror("Thread synchronization initialization failed");
-        return ERROR;
-    }
+int Database_INIT(Database* local_db){
+    int Shared_Memory_State = 0;
 
     if (Initialize_Remote_Database(local_db) == ERROR){
         perror("Remote Database initialization failed");
         return ERROR;
     }
 
-    if (pthread_create(Synchronization_Thread,Synchronization_Attributes,Pthread_Synchronize_With_Remote,local_db) != 0){
-        perror("Synchronization thread initialization failed");
+    Shared_Memory_State = Initialize_Shared_Memory();
+    
+    if (Shared_Memory_State == ERROR){
+        perror("Shared memory initialization failed");
         return ERROR;
+    }
+    if (Shared_Memory_State == NEW_SHARED_MEMORY){
+        if (Initialize_Thread_Synchronization() == ERROR){
+            perror("Thread synchronization initialization failed");
+            return ERROR;
+        }
     }
     return SUCCESS;
 }
@@ -58,20 +56,27 @@ int Database_INIT(Database* local_db, pthread_t* Synchronization_Thread, pthread
 static int Initialize_Shared_Memory(){
     int Shared_Mutex_FD;
     int Shared_Condition_FD;
+    int Database_State = SUCCESS;
 
     Shared_Mutex_FD = shm_open(SHARED_MUTEX_NAMETAG, O_RDWR, 0666);
-    if (Shared_Mutex_FD == -1) Shared_Mutex_FD = shm_open(SHARED_MUTEX_NAMETAG, O_CREAT|O_RDWR, 0666);
+    if (Shared_Mutex_FD == -1){
+        Shared_Mutex_FD = shm_open(SHARED_MUTEX_NAMETAG, O_CREAT|O_RDWR, 0666);
+        Database_State = NEW_SHARED_MEMORY;
+    }
     if (Shared_Mutex_FD == -1) return ERROR;
     ftruncate(Shared_Mutex_FD,sizeof(pthread_mutex_t));
     Database_Synchronization_Lock = mmap(0, sizeof(pthread_mutex_t), PROT_READ|PROT_WRITE, MAP_SHARED, Shared_Mutex_FD, 0);
 
 
     Shared_Condition_FD = shm_open(SHARED_CONDITION_NAMETAG, O_RDWR, 0666);
-    if (Shared_Condition_FD == -1) Shared_Condition_FD = shm_open(SHARED_CONDITION_NAMETAG, O_CREAT|O_RDWR, 0666);
+    if (Shared_Condition_FD == -1){
+        Shared_Condition_FD = shm_open(SHARED_CONDITION_NAMETAG, O_CREAT|O_RDWR, 0666);
+        Database_State = NEW_SHARED_MEMORY;
+    }
     if (Shared_Condition_FD == -1) return ERROR;
     ftruncate(Shared_Condition_FD, sizeof(pthread_cond_t));
     Database_Changed_Signal = mmap(0, sizeof(pthread_cond_t), PROT_READ|PROT_WRITE, MAP_SHARED, Shared_Condition_FD, 0);
-    return SUCCESS;
+    return Database_State;
 }
 
 static int Initialize_Thread_Synchronization(){
@@ -158,7 +163,7 @@ Record Make_New_Record(int Input_Data){
                             Synchronization:
 ///////////////////////////////////////////////////////////////////////////////*/
 
-static void *Pthread_Synchronize_With_Remote(void * Database_input){
+void *Pthread_Synchronize_With_Remote(void * Database_input){
     FILE* Database_FD = NULL;
     Database Remote_Database_Comparison_Copy;
     while(1){
@@ -173,6 +178,7 @@ static void *Pthread_Synchronize_With_Remote(void * Database_input){
     }
     return NULL;
 }
+
 static inline int Compare_Records(Database* First, Database* Second){
     for(int i =0; i<MAX_RECORDS_COUNT; ++i){
         if (memcmp((void*)&First->Records[i], (void*)&Second->Records[i],sizeof(Record)) != 0)

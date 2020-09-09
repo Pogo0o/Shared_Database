@@ -13,6 +13,7 @@
 #define SUCCESS 1
 #define ERROR -1
 #define NEW_DATABASE 2
+#define NEW_SHARED_MEMORY 2
 
 #define RECORDS_DIFFERENT 0
 #define RECORDS_SAME 1
@@ -45,7 +46,7 @@ extern const char* REMOTE_DATABASE;
 *            Database_INIT(local_db_ptr), Sync_Thread_Ptr, Sync_Attr_Ptr;
 */
 
-int Database_INIT(Database*, pthread_t*, pthread_attr_t*);
+int Database_INIT(Database*);
 
 /*
 *   Main functionality of a Database:
@@ -58,5 +59,7 @@ int Read_Database_From_File(Database*);
 int Write_Database_To_File(Database*);
 int Change_Local_Record(Database*, const __uint8_t, const Record);
 Record Make_New_Record(int);
+
+extern void *Pthread_Synchronize_With_Remote(void * Database_input);
 
 #endif
