@@ -1,7 +1,7 @@
 #include "../include/Database.h"
 
 /*///////////////////////////////////////////////////////////////////////////////
-                            VARIABLES:
+                            Global Variables:
 ///////////////////////////////////////////////////////////////////////////////*/
 
 static pthread_mutex_t Database_Access_Lock = PTHREAD_MUTEX_INITIALIZER;
@@ -15,7 +15,7 @@ const char* REMOTE_DATABASE = "/tmp/Database.db";
 Sync_State Changed_Records_Report;
 
 /*///////////////////////////////////////////////////////////////////////////////
-                            FUNCTIONS:
+                            Static Functions declarations:
 ///////////////////////////////////////////////////////////////////////////////*/
 
 static int Initialize_Shared_Memory();
@@ -26,6 +26,10 @@ static void* Pthread_Synchronize_With_Remote(void *);
 static inline int Compare_Records(Database*, Database*);
 static inline int Remote_DB_Comparison_Check(Database*);
 static void Synchronize_Local_DB(FILE*, Database*, Sync_State*);
+
+/*///////////////////////////////////////////////////////////////////////////////
+                            Initialization:
+///////////////////////////////////////////////////////////////////////////////*/
 
 int Database_INIT(Database* local_db, pthread_t* Synchronization_Thread, pthread_attr_t* Synchronization_Attributes){
     
@@ -99,6 +103,10 @@ static int Initialize_Remote_Database(Database* local_db){
     return SUCCESS;
 }
 
+/*///////////////////////////////////////////////////////////////////////////////
+                            Main functionality:
+///////////////////////////////////////////////////////////////////////////////*/
+
 int Read_Database_From_File(Database* local_db){
     FILE* Database_FD;
     int Operation_State = ERROR;
@@ -139,6 +147,16 @@ int Change_Local_Record(Database* local_db, const __uint8_t recordID, const Reco
     }
     return ERROR;
 }
+
+Record Make_New_Record(int Input_Data){
+    Record local_Record;
+    local_Record.Data = Input_Data;
+    return local_Record;
+}
+
+/*///////////////////////////////////////////////////////////////////////////////
+                            Synchronization:
+///////////////////////////////////////////////////////////////////////////////*/
 
 static void *Pthread_Synchronize_With_Remote(void * Database_input){
     FILE* Database_FD = NULL;

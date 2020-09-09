@@ -9,7 +9,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-#define MAX_RECORDS_COUNT 16
+#define MAX_RECORDS_COUNT 5
 #define SUCCESS 1
 #define ERROR -1
 #define NEW_DATABASE 2
@@ -42,8 +42,9 @@ extern const char* REMOTE_DATABASE;
 *   Database setup - crucial for the .so file to work properly.
 *   
 *   Example:
-*            Database_INIT(local_db_ptr);
+*            Database_INIT(local_db_ptr), Sync_Thread_Ptr, Sync_Attr_Ptr;
 */
+
 int Database_INIT(Database*, pthread_t*, pthread_attr_t*);
 
 /*
@@ -56,5 +57,6 @@ int Database_INIT(Database*, pthread_t*, pthread_attr_t*);
 int Read_Database_From_File(Database*);
 int Write_Database_To_File(Database*);
 int Change_Local_Record(Database*, const __uint8_t, const Record);
+Record Make_New_Record(int);
 
 #endif
