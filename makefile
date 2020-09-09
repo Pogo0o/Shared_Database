@@ -1,23 +1,23 @@
 CC			:= gcc
 CCFLAGS		:= -Wall -g
 
-all: dirs so main test standalone
+all: dirs so consumer producer standalone
 
 dirs:
 	mkdir -p ./bin/
 	mkdir -p ./lib/
 
-main:
+consumer:
 	@echo "Building main..."
-	$(CC) $(CCFLAGS) -o bin/main src/main.c -L./lib/ -ldatabase -pthread -lrt
+	$(CC) $(CCFLAGS) -o bin/Consumer tests/Consumer.c -L./lib/ -ldatabase -pthread -lrt
 
-test:
+producer:
 	@echo "Building test..."
-	$(CC) $(CCFLAGS) -o bin/test tests/main.c -L./lib/ -ldatabase -pthread -lrt
+	$(CC) $(CCFLAGS) -o bin/Producer tests/Producer.c -L./lib/ -ldatabase -pthread -lrt
 
 standalone:
 	@echo "Building standalone..."
-	$(CC) $(CCFLAGS) -o bin/independent_main src/Database.c tests/standalone.c -pthread -lrt
+	$(CC) $(CCFLAGS) -o bin/Standalone src/Database.c tests/standalone.c -pthread -lrt
 
 so: 
 	@echo "Building Shared Object..."
