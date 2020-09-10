@@ -19,9 +19,6 @@ so:
 	@echo "Building Shared Object..."
 	$(CC) $(CCFLAGS) -shared -fpic -o lib/libdatabase.so src/Database.c -lrt
 
-linker:
-	ldconfig -l ./lib/libdatabase.so
-
 clean:
 	@echo "Clearing..."
 	-rm bin/*

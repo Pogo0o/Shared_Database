@@ -8,6 +8,10 @@ Subprocedures for individual executables:
 Making the shared object:
 - make so
 
+In order for the shared library to work it needs to be cached, to do so one can use ldconfig with ./lib/ parameter.
+I have done it this way as I have assumed this library should be put in a folder with all dynamic libraries that is already added as a library search path.
+After consideration I have decided not to put it in a directory with all linux libraries, as it required access to super user privilages.
+
 Testing:
 - ./bin/Consumer displays the currnent values for the entire local copy of the database.
 - ./bin/Producer increases a record whose index is passed to the program at runtime.
