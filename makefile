@@ -1,7 +1,7 @@
 CC			:= gcc
 CCFLAGS		:= -Wall -g
 
-all: dirs so consumer producer
+all: dirs so consumer producer linker
 
 dirs:
 	mkdir -p ./bin/
@@ -18,6 +18,9 @@ producer:
 so: 
 	@echo "Building Shared Object..."
 	$(CC) $(CCFLAGS) -shared -fpic -o lib/libdatabase.so src/Database.c -lrt
+
+linker:
+	ldconfig -l ./lib/libdatabase.so
 
 clean:
 	@echo "Clearing..."

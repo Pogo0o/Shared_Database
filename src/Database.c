@@ -10,7 +10,7 @@ pthread_cond_t *Database_Changed_Signal;
 
 const char* SHARED_MUTEX_NAMETAG = "SHARED_MEMORY_MUTEX_DB";
 const char* SHARED_CONDITION_NAMETAG = "SHARED_MEMORY_CONDITION_DB";
-const char* REMOTE_DATABASE = "/tmp/Database.db";
+const char* REMOTE_DATABASE = "./lib/Database.db";
 
 Sync_State Changed_Records_Report;
 
@@ -31,15 +31,9 @@ static void Synchronize_Local_DB(FILE*, Database*, Sync_State*);
 ///////////////////////////////////////////////////////////////////////////////*/
 
 int Database_INIT(Database* local_db){
-    int Shared_Memory_State = 0;
-
-    if (Initialize_Remote_Database(local_db) == ERROR){
-        perror("Remote Database initialization failed");
-        return ERROR;
-    }
+    int Shared_Memory_State;
 
     Shared_Memory_State = Initialize_Shared_Memory();
-    
     if (Shared_Memory_State == ERROR){
         perror("Shared memory initialization failed");
         return ERROR;
@@ -50,6 +44,12 @@ int Database_INIT(Database* local_db){
             return ERROR;
         }
     }
+
+    if (Initialize_Remote_Database(local_db) == ERROR){
+        perror("Remote Database initialization failed");
+        return ERROR;
+    }
+
     return SUCCESS;
 }
 
@@ -83,14 +83,12 @@ static int Initialize_Thread_Synchronization(){
     pthread_mutexattr_t Sync_Mutex_Attr;
     pthread_condattr_t Sync_Cond_Attr;
 
-    //Initialize a shared memory mutex
     if (pthread_mutexattr_init(&Sync_Mutex_Attr) != 0) return ERROR;
     pthread_mutexattr_setpshared(&Sync_Mutex_Attr,PTHREAD_PROCESS_SHARED);
     if (pthread_mutex_init(Database_Synchronization_Lock, &Sync_Mutex_Attr) != 0) return ERROR;
     if (pthread_mutex_init(&Database_Access_Lock, &Sync_Mutex_Attr) != 0) return ERROR;
     pthread_mutexattr_destroy(&Sync_Mutex_Attr);
 
-    //Initialize a shared memory condition variable
     if (pthread_condattr_init(&Sync_Cond_Attr) != 0) return ERROR;
     pthread_condattr_setpshared(&Sync_Cond_Attr,PTHREAD_PROCESS_SHARED);
     if (pthread_cond_init(Database_Changed_Signal, &Sync_Cond_Attr) != 0) return ERROR;
