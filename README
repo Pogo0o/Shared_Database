@@ -8,10 +8,6 @@ Subprocedures for individual executables:
 Making the shared object only:
 - make so
 
-In order for the shared library to work it needs to be cached, to do so I have used ldconfig with ./lib/
-It has been done this way due to the fact that I did not want to put the .so in a folder with all the libraries as it would require super user privilages.
-Additionaly as this is just an excercise I have decided to put it in a relative directory.
-
 Testing:
 - ./bin/Consumer displays the currnent values for the entire local copy of the database.
 - ./bin/Producer increases a record whose index is passed to the program at runtime.
