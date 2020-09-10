@@ -15,6 +15,7 @@ Additionaly as this is just an excercise I have decided to put it in a relative 
 Testing:
 - ./bin/Consumer displays the currnent values for the entire local copy of the database.
 - ./bin/Producer increases a record whose index is passed to the program at runtime.
+Programs runs flawlessly directly after a machine boot up, although is not bug-free.
 
 Known bugs:
 - Deadlock seems to occur during write operation by the Producer program.

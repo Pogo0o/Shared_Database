@@ -5,17 +5,11 @@
 
 int main(int argc, char* argv[]){
     Database local_db;
-    pthread_t Sync_Thread;
     int Record_Position = atoi(argv[1]);
 
     setbuf(stdout,NULL);
 
     Database_INIT(&local_db);
-    
-    if (pthread_create(&Sync_Thread, NULL, Pthread_Synchronize_With_Remote, &local_db) != 0){
-        perror("Thread creation failed");
-        return ERROR;
-    }
 
     if(argc > 1){
         if(Record_Position > MAX_RECORDS_COUNT) {
