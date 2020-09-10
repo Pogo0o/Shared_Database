@@ -1,7 +1,7 @@
 CC			:= gcc
 CCFLAGS		:= -Wall -g
 
-all: dirs so consumer producer linker
+all: dirs so consumer producer
 
 dirs:
 	mkdir -p ./bin/
