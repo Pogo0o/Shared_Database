@@ -17,6 +17,7 @@ Testing:
 - ./bin/Producer increases a record whose index is passed to the program at runtime.
 
 Known issues:
-- Deadlock seems to occur during write operation by the Producer program. I am currently trying to find a solution for this issue.
+- Deadlock seems to occur during write operation by the Producer program.
+  After problem analysis and debugging it seems that the lock could be connected with operation of Database_Synchronization_Lock and Database_Changed_Signal in shared memory.
 - Without properly conducted initialization of shared memory and pthread synchronization tools, the program is no longer allowed to operate optimally.
   This issue is especially visible after a deadlock.

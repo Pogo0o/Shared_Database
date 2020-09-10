@@ -33,23 +33,28 @@ static void Synchronize_Local_DB(FILE*, Database*, Sync_State*);
 int Database_INIT(Database* local_db){
     int Shared_Memory_State;
 
+    printf("Joining shared memory...\n");
     Shared_Memory_State = Initialize_Shared_Memory();
     if (Shared_Memory_State == ERROR){
         perror("Shared memory initialization failed");
         return ERROR;
     }
     if (Shared_Memory_State == NEW_SHARED_MEMORY){
+        printf("No existing shared memory found...\n");
+        printf("Initalizing thread synchronization...\n");
         if (Initialize_Thread_Synchronization() == ERROR){
             perror("Thread synchronization initialization failed");
             return ERROR;
         }
     }
 
+    printf("Initalizing remote database...\n");
     if (Initialize_Remote_Database(local_db) == ERROR){
         perror("Remote Database initialization failed");
         return ERROR;
     }
 
+    printf("Initialization COMPLETED\n");
     return SUCCESS;
 }
 
@@ -172,7 +177,9 @@ void *Pthread_Synchronize_With_Remote(void * Database_input){
         while(Remote_DB_Comparison_Check((Database*)Database_input)){
             pthread_cond_wait(Database_Changed_Signal, Database_Synchronization_Lock);
         }
+        printf("Broadcast RECEIVED\n");
         Synchronize_Local_DB(Database_FD, (Database*)Database_input, &Changed_Records_Report);
+        printf("Synchronization COMPLETED\n");
         pthread_mutex_unlock(Database_Synchronization_Lock);
     }
     return NULL;
