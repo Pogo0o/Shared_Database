@@ -4,7 +4,7 @@
                             Global Variables:
 ///////////////////////////////////////////////////////////////////////////////*/
 
-static pthread_mutex_t Database_Access_Lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t Database_Access_Lock;
 pthread_mutex_t *Database_Synchronization_Lock; 
 pthread_cond_t *Database_Changed_Signal;
 
@@ -87,6 +87,7 @@ static int Initialize_Thread_Synchronization(){
     if (pthread_mutexattr_init(&Sync_Mutex_Attr) != 0) return ERROR;
     pthread_mutexattr_setpshared(&Sync_Mutex_Attr,PTHREAD_PROCESS_SHARED);
     if (pthread_mutex_init(Database_Synchronization_Lock, &Sync_Mutex_Attr) != 0) return ERROR;
+    if (pthread_mutex_init(&Database_Access_Lock, &Sync_Mutex_Attr) != 0) return ERROR;
     pthread_mutexattr_destroy(&Sync_Mutex_Attr);
 
     //Initialize a shared memory condition variable
