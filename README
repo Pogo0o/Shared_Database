@@ -14,3 +14,10 @@ In order to run these programs a library's directory had to be added to cached o
 In oder to resolve above issue use: sudo ldconfig {lib directory}
 
 Testing:
+- ./bin/Consumer displays the currnent values for the entire local copy of the database.
+- ./bin/Producer increases a record whose index is passed to the program at runtime.
+
+Known issues:
+- A deadlock when Consumer tries to Write to a remote database at the same moment when a producer.
+- There is no way to determine whether or not shared memory segment was initialized without initializing the mutex and condition variable
+  This makes the synchronization mechanism fail, it is fixed by restarting the machine.
