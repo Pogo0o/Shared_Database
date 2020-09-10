@@ -7,13 +7,13 @@ dirs:
 	mkdir -p ./bin/
 	mkdir -p ./lib/
 
-consumer:
+consumer: so
 	@echo "Building main..."
-	$(CC) $(CCFLAGS) -o bin/Consumer tests/Consumer.c -L./lib/ -ldatabase -pthread -lrt
+	$(CC) $(CCFLAGS) -o bin/Consumer tests/Consumer.c -L./lib/ -ldatabase -pthread -lrt -Wl,-rpath,"./lib/"
 
-producer:
+producer: so
 	@echo "Building test..."
-	$(CC) $(CCFLAGS) -o bin/Producer tests/Producer.c -L./lib/ -ldatabase -pthread -lrt
+	$(CC) $(CCFLAGS) -o bin/Producer tests/Producer.c -L./lib/ -ldatabase -pthread -lrt -Wl,-rpath,"./lib/"
 
 so: 
 	@echo "Building Shared Object..."
