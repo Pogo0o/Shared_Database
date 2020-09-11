@@ -120,14 +120,14 @@ int Read_Database_From_File(Database* local_db){
     FILE* Database_FD;
     int Operation_State = ERROR;
 
-    pthread_mutex_lock(&Database_Synchronization_Lock);
+    pthread_mutex_lock(&Database_Access_Lock);
     Database_FD = fopen(REMOTE_DATABASE,"rb");
     if(Database_FD != NULL){
         fread(local_db, sizeof(Database), 1, Database_FD);
         fclose(Database_FD);
         Operation_State = SUCCESS;
     }
-    pthread_mutex_unlock(&Database_Synchronization_Lock);
+    pthread_mutex_unlock(&Database_Access_Lock);
 
     return Operation_State;
 }
@@ -136,14 +136,14 @@ int Write_Database_To_File(Database* local_db){
     FILE* Database_FD;
     int Operation_State = ERROR;
 
-    pthread_mutex_lock(&Database_Synchronization_Lock);
+    pthread_mutex_lock(&Database_Access_Lock);
     Database_FD = fopen(REMOTE_DATABASE,"wb");
     if(Database_FD != NULL){
         fwrite(local_db, sizeof(Database), 1, Database_FD);
         fclose(Database_FD);
         Operation_State = SUCCESS;
     }
-    pthread_mutex_unlock(&Database_Synchronization_Lock);
+    pthread_mutex_unlock(&Database_Access_Lock);
 
     pthread_mutex_lock(Database_Synchronization_Lock);
     pthread_cond_broadcast(Database_Changed_Signal);
