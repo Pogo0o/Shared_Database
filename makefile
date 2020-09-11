@@ -1,25 +1,26 @@
 CC			:= gcc
 CCFLAGS		:= -Wall -g
+SHARED		:= -shared -fpic
+LIBS		:= -ldatabase -pthread -lrt
+DBLINK		:= -Wl,-rpath,"./lib/"
 
-all: dirs so consumer producer
+all: dirs libdatabase consumer producer
 
 dirs:
-	mkdir -p ./bin/
 	mkdir -p ./lib/
 
-consumer: so
+consumer: libdatabase
 	@echo "Building main..."
-	$(CC) $(CCFLAGS) -o bin/Consumer tests/Consumer.c -L./lib/ -ldatabase -pthread -lrt -Wl,-rpath,"./lib/"
+	$(CC) $(CCFLAGS) -o $@ tests/Consumer.c -L./lib/ $(LIBS) $(DBLINK)
 
-producer: so
+producer: libdatabase
 	@echo "Building test..."
-	$(CC) $(CCFLAGS) -o bin/Producer tests/Producer.c -L./lib/ -ldatabase -pthread -lrt -Wl,-rpath,"./lib/"
+	$(CC) $(CCFLAGS) -o $@ tests/Producer.c -L./lib/ $(LIBS) $(DBLINK)
 
-so: 
+libdatabase: 
 	@echo "Building Shared Object..."
-	$(CC) $(CCFLAGS) -shared -fpic -o lib/libdatabase.so src/Database.c -lrt
+	$(CC) $(CCFLAGS) $(SHARED) -o lib/$@.so src/Database.c -lrt
 
 clean:
 	@echo "Clearing..."
-	-rm bin/*
 	-rm lib/*
