@@ -5,13 +5,13 @@
 
 int main(int argc, char* argv[]){
     Database local_db;
-    int Record_Position = atoi(argv[1]);
 
     setbuf(stdout,NULL);
 
     Database_INIT(&local_db);
 
     if(argc > 1){
+        int Record_Position = atoi(argv[1]);
         if(Record_Position > MAX_RECORDS_COUNT) {
             perror("Index out of bouds");
             return 0;
