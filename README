@@ -11,11 +11,11 @@ Making the shared object only:
 Testing:
 - ./bin/Consumer displays the currnent values for the entire local copy of the database.
 - ./bin/Producer increases a record whose index is passed to the program at runtime.
-Programs runs flawlessly directly after a machine boot up, although is not bug-free.
+Programs runs flawlessly directly after a machine boot up, although they are not bug-free.
 
 Known bugs:
 - Deadlock seems to occur during write operation by the Producer program.
-  After problem analysis and debugging it seems that the lock could be connected with operation of Database_Synchronization_Lock and Database_Changed_Signal in shared memory.
+  After problem analysis and debugging, it seems that the lock could be connected with operation of Database_Synchronization_Lock and Database_Changed_Signal in shared memory.
 - Without properly conducted initialization of shared memory and pthread synchronization tools, the program is no longer allowed to operate optimally.
   This issue is especially visible after a deadlock.
 - If shared memory is initialized prior to first launch, the program does not respond.
