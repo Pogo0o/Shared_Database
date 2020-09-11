@@ -12,7 +12,7 @@ int main(int argc, char* argv[]){
 
     if(argc > 1){
         int Record_Position = atoi(argv[1]);
-        if(Record_Position >= MAX_RECORDS_COUNT) {
+        if(Record_Position >= MAX_RECORDS_COUNT || Record_Position < 0) {
             perror("Index out of bouds");
             return 0;
         }
