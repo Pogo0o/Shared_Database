@@ -10,7 +10,7 @@ pthread_cond_t *Database_Changed_Signal;
 
 const char* SHARED_MUTEX_NAMETAG = "SHARED_MEMORY_MUTEX_DB";
 const char* SHARED_CONDITION_NAMETAG = "SHARED_MEMORY_CONDITION_DB";
-const char* REMOTE_DATABASE = "./lib/Database.db";
+const char* REMOTE_DATABASE = "Database.db";
 
 Sync_State Changed_Records_Report;
 
