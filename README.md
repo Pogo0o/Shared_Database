@@ -13,7 +13,7 @@ This repository contains a simple dynamically shared library that implements a s
 Use included makefile with a GNU compiler in order to build the project:
 	
 	make
-The compilation out[ut should be as follows:
+The compilation output should be as follows:
 
 	/lib/libdatabase.so
 	./consumer
