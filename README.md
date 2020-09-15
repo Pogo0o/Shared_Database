@@ -54,5 +54,5 @@ Output example:
 	Data is 1
 
 ### Known Issues
- - [ ] This project does not implement a cleanup program that clears the shared memory segment and this causes problem once all instances of a database are closed, as pointers to data synchronization mutex and condition variables are freed. Reboot solves this problem as it makes sure that there is no shared memory allocated.
+ - [ ] This project does not implement a cleanup program that clears the shared memory segment and this causes problem once all instances of a database are closed, as pointers to data synchronization mutex and condition variables are freed. Machine reboot solves this problem, though.
  - [x] FIXED. Deadlock occurs during the write operation of a producer. It was casued by a lack of a synchronization between a condition broadcast and condition wait, which resulted in infinite waiting from the consumer thread.
