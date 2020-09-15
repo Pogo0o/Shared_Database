@@ -49,6 +49,12 @@ extern const char* REMOTE_DATABASE;
 int Database_INIT(Database*);
 
 /*
+*   Database termination
+*/
+
+int Database_CLOSE();
+
+/*
 *   Main functionality of a Database:
 *   - Update the local database with remote file contents
 *   - Write the local database to a remote file

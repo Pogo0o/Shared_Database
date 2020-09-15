@@ -58,6 +58,22 @@ int Database_INIT(Database* local_db){
     return SUCCESS;
 }
 
+int Database_CLOSE(){
+    if (munmap(Database_Synchronization_Lock, sizeof(pthread_mutex_t))){
+        perror("Mutex unmap failed");
+        return ERROR;
+    }
+
+    if (munmap(Database_Changed_Signal, sizeof(pthread_cond_t))){
+        perror("Condition unmap failed");
+        return ERROR;
+    }
+
+    shm_unlink(SHARED_MUTEX_NAMETAG);
+    shm_unlink(SHARED_CONDITION_NAMETAG);
+    return SUCCESS;
+}
+
 static int Initialize_Shared_Memory(){
     int Shared_Mutex_FD;
     int Shared_Condition_FD;
