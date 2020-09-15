@@ -23,6 +23,9 @@ int main(int argc, char* argv[]){
         Write_Database_To_File(&local_db);
         printf("Data is %d\n", local_db.Records[Record_Position].Data);
     }
+    else{
+        printf("No parameter has been passed");
+    }
 
     return 0;
 }
