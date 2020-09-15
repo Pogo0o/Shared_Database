@@ -28,3 +28,4 @@ libdatabase:
 clean:
 	@echo "Clearing..."
 	-rm lib/*
+	-rm ./cleaner ./consumer ./producer
