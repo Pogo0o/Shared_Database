@@ -18,11 +18,13 @@ The compilation output should be as follows:
 	/lib/libdatabase.so
 	./consumer
 	./producer
+	./cleaner
 
 ### Testing
 Inside of the project there are two files that were used to assure that the main functionality of the database are acheived correctly.
 * Consumer program
 * Producer program
+* Cleaner program
 ##### Consumer
 This program simulates the synchronization of the database each time a broadcast is received.
 Output example:
@@ -53,6 +55,12 @@ Output example:
 	Local record changed...
 	Data is 1
 
+##### Cleaner
+This program is used to simulate the closing of a Database shared memory segment.
+Output example:
+
+	Database closing completed...
+
 ### Known Issues
- - [ ] This project does not implement a cleanup program that clears the shared memory segment and this causes problem once all instances of a database are closed, as pointers to data synchronization mutex and condition variables are freed. Machine reboot solves this problem, though.
+ - [x] FIXED. This project does not implement a cleanup program that clears the shared memory segment and this causes problem once all instances of a database are closed, as pointers to data synchronization mutex and condition variables are freed. Machine reboot solves this problem, though.
  - [x] FIXED. Deadlock occurs during the write operation of a producer. It was casued by a lack of a synchronization between a condition broadcast and condition wait, which resulted in infinite waiting from the consumer thread.
