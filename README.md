@@ -21,7 +21,7 @@ The compilation output should be as follows:
 	./cleaner
 
 ### Testing
-Inside of the project there are two files that were used to assure that the main functionality of the database are acheived correctly.
+Inside of the project there are three files that were used to assure that the main functionality of the database are acheived correctly.
 * Consumer program
 * Producer program
 * Cleaner program
